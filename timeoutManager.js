@@ -1,6 +1,7 @@
 class TimersManager {
   constructor() {
       this.timers = [];
+      this.logs = [];
       this.started;
   }
 
@@ -49,7 +50,41 @@ class TimersManager {
     }
   }
 
+  _log(element) {
+    let log = this.createLog(element);
+    this.logs.push(log);
+
+    //if error is not exit, then it is allowed to create timeout
+    return log.error !== undefined;
+  }
+
+  createLog(element) {
+    let res = {};
+
+    res['name'] = element.timer.name;
+    res['in'] = element.in;
+    try {
+      res['out'] = element.timer.job(...element.in);
+    } catch (error) {
+      res['out'] = undefined;
+      res['error'] = {name: error.name, message: error.message, stack: error.stack};
+    }
+    res['created'] = new Date();
+
+    return res;
+  }
+
+  print() {
+    console.log(this.logs);
+  }
+
   createTimeout(element) {
+    const loggedWithError = this._log(element);
+
+    if (loggedWithError) {
+      return;
+    }
+
     let instance;
     if (element.timer.interval) {
       instance = setInterval(
@@ -73,7 +108,6 @@ class TimersManager {
       clearTimeout(element.timerInstance);
     }
   }
-
 
   add(timer, ...params) {
     this.validate(timer);
@@ -131,29 +165,41 @@ class TimersManager {
 
 }
 
-
 const manager = new TimersManager();
 
-const t1 = {
-  name:     't1',
+const t0 = {
+  name:     't0',
   delay:    1000,
-  interval: true,
-  job:      () => { console.log('t1') }
+  interval: false,
+  job:      () => { console.log('t0') }
+};
+
+const t1 = {
+    name:     't1',
+    delay:    1000,
+    interval: false,
+    job:      (a, b) => a + b
 };
 
 const t2 = {
-  name:     't2',
-  delay:    1000,
-  interval: false,
-  job:      (a, b) => console.log(a + b)
+    name:     't2',
+    delay:    1000,
+    interval: false,
+    job:      () => {throw new Error('We have a problem!')}
 };
 
+const t3 = {
+    name:     't3',
+delay: 1000, interval: false, job: n => n
+};
 
-manager.add(t1);
-manager.add(t2, 1, 2);
+manager.add(t0)
+manager.add(t1, 1, 2) // 3
+manager.add(t2); // undefined
+manager.add(t3, 1); // 1
+
 manager.start();
-manager.stop();
-// manager.resume('t2');
-//manager.stop();
 
-//manager.remove('t1');
+setTimeout(() => {
+    manager.print();
+}, 2000);
