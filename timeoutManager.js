@@ -122,6 +122,21 @@ class TimersManager {
     });
     this.started = true;
 
+    this.mainTimeout();
+  }
+
+  mainTimeout() {
+    let biggestDelay = 0;
+
+    this.timers.forEach(element => {
+      if (biggestDelay < element.timer.delay) {
+        biggestDelay = element.timer.delay;
+      }
+    });
+
+    setTimeout(() => {
+      manager.kill();
+    }, 10000 + biggestDelay);
   }
 
   pause(name) {
@@ -142,6 +157,11 @@ class TimersManager {
         this.timers.pop(element);
       }
     });
+  }
+
+  kill() {
+    this.stop();
+    this.timers = [];
   }
 
   stop() {
@@ -169,8 +189,8 @@ const manager = new TimersManager();
 
 const t0 = {
   name:     't0',
-  delay:    1000,
-  interval: false,
+  delay:    2000,
+  interval: true,
   job:      () => { console.log('t0') }
 };
 
@@ -183,7 +203,7 @@ const t1 = {
 
 const t2 = {
     name:     't2',
-    delay:    1000,
+    delay:    4000,
     interval: false,
     job:      () => {throw new Error('We have a problem!')}
 };
@@ -199,7 +219,3 @@ manager.add(t2); // undefined
 manager.add(t3, 1); // 1
 
 manager.start();
-
-setTimeout(() => {
-    manager.print();
-}, 2000);
