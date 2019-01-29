@@ -102,7 +102,6 @@ class Bank extends EventEmitter{
     this.persons.forEach(p => {
       if (p.name === person.name) {
         this.emit('error', `Name ${person.name} is in use`);
-        //throw new Error(`Name ${personName} is in use`);
       }
     });
 
