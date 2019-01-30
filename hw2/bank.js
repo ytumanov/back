@@ -40,7 +40,12 @@ class Bank extends EventEmitter{
       this.emit('error', `Not valid balance to remove provided`);
     }
 
-    this._isLimitValid(person, balanceToRemove);
+    this._isLimitValid(
+      person,
+      balanceToRemove,
+      person.balance,
+      person.balance - balanceToRemove,
+    );
 
     if (balanceToRemove > person.balance) {
       this.emit('error', `Balance to remove is more than user has`);
@@ -63,7 +68,20 @@ class Bank extends EventEmitter{
       this.emit('error', `Sender could not send more than his balance`);
     }
 
-    this._isLimitValid(from, value);
+    this._isLimitValid(
+      from,
+      value,
+      from.balance,
+      from.balance - value,
+    );
+
+    //lines 79-84 could be removed, there is no reason to check receiver balance
+    this._isLimitValid(
+      to,
+      value,
+      to.balance,
+      to.balance + value,
+    );
     
     from.balance -= value;
     to.balance += value;
@@ -82,8 +100,8 @@ class Bank extends EventEmitter{
     person.limit = func;
   }
 
-  _isLimitValid(person, amount) {
-    if (!person.limit(amount, person.balance, person.balance - amount)) {
+  _isLimitValid(person, ...params) {
+    if (!person.limit(...params)) {
       this.emit('error', `Not allowed limit provided`);
     }
   }

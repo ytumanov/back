@@ -32,26 +32,32 @@ bank.on('send', (idFrom, idTo, value) => {
 const personId = bank.register({
   name: 'Oliver White',
   balance: 700,
-  limit: (amount, currentBalance, updatedBalance) => amount < 10
+  limit: (amount) => amount < 10
 });
 
 const personIdBlack = bank.register({
   name: 'Oliver Black',
   balance: 700,
-  limit: (amount, currentBalance, updatedBalance) => amount < 10
+  limit: (amount) => amount < 10
 });
 
 bank.emit('withdraw', personId, 5);
 bank.emit('get', personId, (amount, name) => {
   console.log(`${name} has ${amount}₴`); // I have 695₴
 });
-// Вариант 1
+//Вариант 1
 bank.emit('changeLimit', personId, (amount, currentBalance, updatedBalance) => {
   return amount < 100 && updatedBalance > 650;
 });
 bank.emit('withdraw', personId, 15);
 bank.emit('get', personId, (amount, name) => {
   console.log(`${name} has ${amount}₴`); // I have 680₴
+});
+
+// Вариант 2
+bank.emit('changeLimit', personIdBlack, (amount, currentBalance, updatedBalance) => {
+  return amount < 100 && updatedBalance > 700 && currentBalance >
+600;
 });
 
 //test limit on send
