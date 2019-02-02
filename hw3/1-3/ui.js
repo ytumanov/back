@@ -1,8 +1,8 @@
 const { Readable } = require('stream');
 
 class Ui extends Readable {
-  constructor(data) {
-    super({objectMode: true});
+  constructor(data, options = {objectMode: true}) {
+    super(options);
     this.data = data;
     this.init();
   }

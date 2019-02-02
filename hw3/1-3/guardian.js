@@ -21,11 +21,11 @@ class Guardian extends Transform {
     });
 
     this.on('finish', () => {
-      console.log('\n------ Transform on finish');
+      //console.log('\n------ Transform on finish');
     });
 
     this.on('end', () => {
-      console.log('\n------ Transform on end');
+      //console.log('\n------ Transform on end');
     });
 
     this.on('pipe', () => {
@@ -42,7 +42,7 @@ class Guardian extends Transform {
     }
 
     keys.map(key => {
-      if (obj[key] === ('' || undefined)) {
+      if (obj[key] === '' || obj[key] === undefined) {
         this.emit(
           'error',
           `${key} is required and couldn't be empty`
@@ -61,24 +61,28 @@ class Guardian extends Transform {
 
   }
 
+  _transformObject(obj) {
+    const keys = Object.keys(obj);
+    
+    keys.map(key => {
+      if (key === 'email' || key === 'password') {
+        obj[key] = Buffer.from(obj[key], 'utf8').toString('hex');
+      }
+    })
 
+    return {
+      meta: {source: 'ui'},
+      payload: obj
+    };
+  }
 
   _transform(chunk, encoding, done) {
     this._validateChunk(chunk);
+    const transformed = this._transformObject(chunk);
+    this.push(transformed);
 
-    this.push(chunk);
-
-    
-    // chunk.forEach(element => {
-      
-    // });
-    //console.log('bbbb ' + JSON.stringify(chunk));
     done();
   }
-
-_flush(done) {
-    done();
-}
 }
 
 
