@@ -32,19 +32,20 @@ class AccountManager extends Writable {
     }
 
     _verify(customer) {
-        const cert = `-----BEGIN CERTIFICATE-----
-        MIICATCCAWoCCQCuCSyS6Uak9jANBgkqhkiG9w0BAQsFADBFMQswCQYDVQQGEwJB
-        VTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50ZXJuZXQgV2lkZ2l0
-        cyBQdHkgTHRkMB4XDTE5MDIwNTA5NDkxOFoXDTE5MDMwNzA5NDkxOFowRTELMAkG
-        A1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0
-        IFdpZGdpdHMgUHR5IEx0ZDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAtZi9
-        jNRmE9q1BjTUB1SXRe08ii2D6oL7/VXznYDw4JvBPHncyZIqdWo38pqzg4NJu1Pe
-        bFDsNbNa/1mcy3SDx4A8Wyx6w20BFlYHUzNqJI3u6Tzmsez4LoRh3dstlhFxgVDV
-        xtI0Asn6vN5w5d2MCbjyjaYBD888Ym4PI97LimkCAwEAATANBgkqhkiG9w0BAQsF
-        AAOBgQBoFLPxmm3TL+PBBcXoOGaRbbvGelwXsXgEZCdr+RxMchmbgcKcjc+2+VGa
-        eiiF3RMGjmz2KtYwg0uv2R331EqBzvmgRnoNH/1tnWmJPylcF2eCzG+NSc4kWNRN
-        6ZrCfAkaih1l+niEkWeWMTcRns6hTwJ+yrm/ijs0u8nL1XhAkg==
-        -----END CERTIFICATE-----`;
+        const cert = 
+        '-----BEGIN CERTIFICATE-----\n' +
+        'MIICATCCAWoCCQCuCSyS6Uak9jANBgkqhkiG9w0BAQsFADBFMQswCQYDVQQGEwJB\n' +
+        'VTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50ZXJuZXQgV2lkZ2l0\n' +
+        'cyBQdHkgTHRkMB4XDTE5MDIwNTA5NDkxOFoXDTE5MDMwNzA5NDkxOFowRTELMAkG\n' +
+        'A1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0\n' +
+        'IFdpZGdpdHMgUHR5IEx0ZDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAtZi9\n' +
+        'jNRmE9q1BjTUB1SXRe08ii2D6oL7/VXznYDw4JvBPHncyZIqdWo38pqzg4NJu1Pe\n' +
+        'bFDsNbNa/1mcy3SDx4A8Wyx6w20BFlYHUzNqJI3u6Tzmsez4LoRh3dstlhFxgVDV\n' +
+        'xtI0Asn6vN5w5d2MCbjyjaYBD888Ym4PI97LimkCAwEAATANBgkqhkiG9w0BAQsF\n' +
+        'AAOBgQBoFLPxmm3TL+PBBcXoOGaRbbvGelwXsXgEZCdr+RxMchmbgcKcjc+2+VGa\n' +
+        'eiiF3RMGjmz2KtYwg0uv2R331EqBzvmgRnoNH/1tnWmJPylcF2eCzG+NSc4kWNRN\n' +
+        '6ZrCfAkaih1l+niEkWeWMTcRns6hTwJ+yrm/ijs0u8nL1XhAkg==\n' +
+        '-----END CERTIFICATE-----';
 
         const verify = crypto.createVerify('RSA-SHA256');
         verify.update(JSON.stringify(customer.payload));
