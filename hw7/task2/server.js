@@ -1,9 +1,15 @@
+'use strict';
+
+const JSON2CSV = require('./json2csv');
+const Archiver = require('./archiver');
+
 const net = require('net');
 const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 
 const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
 
 const server = net.createServer();
 const PORT = 8080;
@@ -14,18 +20,60 @@ server.on('connection', socket => {
     console.log('New client connected!');
 
     socket.on('data', msg => {
-      const clientsFilter = JSON.parse(msg);
+      const {filter, meta} = JSON.parse(msg);
+      const json2csv = new JSON2CSV();
+      const archiver = new Archiver();
+      
 
-      if (!validateFilter(clientsFilter, socket)) {
+      if (!validateFilter(filter, socket)) {
         return;
       }
 
-      if (!validateTypes(clientsFilter, socket)) {
+      if (!validateTypes(filter, socket)) {
         return;
       }
 
-      const filteredUsers = filter(clientsFilter);
-      socket.write(`Result: ${JSON.stringify(filteredUsers)}`);
+      if (!validateMeta(meta, socket)) {
+        return;
+      }
+
+      const filteredUsers = filterUsers(filter);
+
+      //return csv to client
+      if (meta.format === 'csv' && !meta.archive) {
+        (async () => {
+          await json2csv.writeToCsvFile(filteredUsers, '/data/filteredUsers.csv', ';')
+        })();
+
+        sendFileToClient('/data/filteredUsers.csv', socket);
+      }
+      
+      if (meta.archive) {
+        //return archived json to client
+        if (meta.format) {
+          const filePath = '/data/filteredUsers.json';
+          (async () => {
+            await writeFile(path.join(__dirname, filePath), JSON.stringify(filteredUsers), 'utf8');
+          })();
+
+          archiver.packFile(filePath, { algorithm: 'gzip'});
+
+          sendFileToClient(filePath + '.gz', socket);
+        //return archived csv to client
+        } else {
+          const filePath = '/data/filteredUsers.csv';
+          (async () => {
+            await json2csv.writeToCsvFile(filteredUsers, filePath, ';')
+          })();
+
+          archiver.packFile(filePath, { algorithm: 'gzip'});
+
+          sendFileToClient(filePath + '.gz', socket);
+        }
+      }
+
+
+      //socket.write(`Result: ${JSON.stringify(filteredUsers)}`);
     });
 
     socket.on('error', error => {
@@ -46,7 +94,14 @@ server.on('listening', () => {
 
 server.listen(PORT);
 
-const filter = (criteria) => {
+const sendFileToClient = (filePath, socket) => {
+  const rs = fs.createReadStream(
+    path.join(__dirname, filePath)
+  );
+  rs.pipe(socket);
+}
+
+const filterUsers = (criteria) => {
     return users.filter(user => fits(user, criteria) && fits(user.name, criteria.name) && fits(user.address, criteria.address));
 }
 
@@ -229,6 +284,35 @@ const validateTypes = (filter, instance) => {
     instance.emit(
         'error',
         new Error(`street should be a string`)
+    );
+    return false;
+  }
+
+  return true;
+}
+
+const validateMeta = (meta, instance) => {
+
+  if (meta.format && typeof meta.format !== 'string') {
+    instance.emit(
+        'error',
+        new Error(`format should be a string`)
+    );
+    return false;
+  }
+
+  if (meta.format && meta.format !== 'csv') {
+    instance.emit(
+        'error',
+        new Error(`Only CSV format is allowed`)
+    );
+    return false;
+  }
+
+  if (meta.archive && typeof meta.archive !== 'boolean') {
+    instance.emit(
+        'error',
+        new Error(`archive should be a boolean`)
     );
     return false;
   }

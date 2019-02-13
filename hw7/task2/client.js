@@ -12,7 +12,13 @@ client.connect(8080, () => {
               zip: '3'
           }
     }
-    client.write(JSON.stringify(filter));
+
+    const meta = {
+        format: 'csv',
+        //archive: true
+    }
+
+    client.write(JSON.stringify({ filter, meta }));
 });
 
 client.on('data', data => {
