@@ -43,37 +43,27 @@ server.on('connection', socket => {
       if (meta.format === 'csv' && !meta.archive) {
         (async () => {
           await json2csv.writeToCsvFile(filteredUsers, '/data/filteredUsers.csv', ';')
+          await sendFileToClient('/data/filteredUsers.csv', socket);
         })();
-
-        sendFileToClient('/data/filteredUsers.csv', socket);
       }
       
       if (meta.archive) {
         //return archived json to client
-        if (meta.format) {
+        if (meta.format !== 'csv') {
           const filePath = '/data/filteredUsers.json';
           (async () => {
             await writeFile(path.join(__dirname, filePath), JSON.stringify(filteredUsers), 'utf8');
+            await archiver.packFile(filePath, socket);
           })();
-
-          archiver.packFile(filePath, { algorithm: 'gzip'});
-
-          sendFileToClient(filePath + '.gz', socket);
         //return archived csv to client
         } else {
           const filePath = '/data/filteredUsers.csv';
           (async () => {
             await json2csv.writeToCsvFile(filteredUsers, filePath, ';')
+            await archiver.packFile(filePath, socket);
           })();
-
-          archiver.packFile(filePath, { algorithm: 'gzip'});
-
-          sendFileToClient(filePath + '.gz', socket);
         }
       }
-
-
-      //socket.write(`Result: ${JSON.stringify(filteredUsers)}`);
     });
 
     socket.on('error', error => {
@@ -95,10 +85,11 @@ server.on('listening', () => {
 server.listen(PORT);
 
 const sendFileToClient = (filePath, socket) => {
+  console.log(path.join(__dirname, filePath))
   const rs = fs.createReadStream(
     path.join(__dirname, filePath)
   );
-  rs.pipe(socket);
+  return rs.pipe(socket);
 }
 
 const filterUsers = (criteria) => {

@@ -19,20 +19,18 @@ client.connect(8080, () => {
     }
 
     const meta = {
-        format: 'csv',
-        archive: true
+        format: 'csv'
     }
 
     client.write(JSON.stringify({ filter, meta }));
 });
 
 client.on('data', data => {
-    console.log(data);
     (async () => {
-        await writeFile(path.join(__dirname, '/receivedData/received.csv.gz'), data, 'utf8');
+        await writeFile(path.join(__dirname, '/receivedData/received.csv'), data);
       })();
 });
 
 client.on('close', () => {
-    console.log('Connection closed!');
+    console.log('File received');
 });

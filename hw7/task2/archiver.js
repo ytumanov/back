@@ -9,39 +9,24 @@ class Archiver {
   constructor() {
   }
 
-  packFile(sourcePath, options) {
+  packFile(sourcePath, socket) {
     const fullPath = path.join(__dirname, sourcePath);
-    this._isValidAlgorithm(options);
     this._isFileExist(fullPath);
 
-    const zip = options.algorithm === 'gzip' ? zlib.createGzip() : zlib.createDeflate();
+    const zip = zlib.createGzip();
     const read = fs.createReadStream(fullPath);
-    const write = fs.createWriteStream(fullPath + '.gz');
 
-    read.pipe(zip).pipe(write)
-    .on('finish', () => {
-      console.log('File has been packed');
-    });
+    return read.pipe(zip).pipe(socket);
   }
 
-  unpackFile(sourcePath) {
+  unpackFile(sourcePath, socket) {
     const fullPath = path.join(__dirname, sourcePath);
     this._isFileExist(fullPath);
 
     const read = fs.createReadStream(fullPath);
     const unzip = zlib.createUnzip();
-    
 
-    const unzipPath = path.join(
-      path.dirname(fullPath),
-      path.basename(fullPath).slice(0, -3));
-
-    const write = fs.createWriteStream(unzipPath);
-
-    read.pipe(unzip).pipe(write)
-    .on('finish', () => {
-      console.log('File has been unpacked');
-    });
+    return read.pipe(unzip).pipe(socket);
   }
 
   _isFileExist(path) {

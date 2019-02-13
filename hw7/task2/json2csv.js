@@ -23,7 +23,6 @@ class JSON2CSV {
     }
 
     const data = this._prepareCsv(json, separator);
-    //console.log(data);
     await writeFile(path.join(__dirname, destinationPath), data);
   }
 
