@@ -55,7 +55,11 @@ class JSON2CSV {
     json.forEach(element => {
       let row = [];
       for (let i = 0; i < columns.length; i++) {
-        row.push(element[columns[i]]);
+        if (typeof element[columns[i]] === 'object') {
+          row.push(JSON.stringify(element[columns[i]]));
+        } else {
+          row.push(element[columns[i]]);
+        }
       }
       rows.push(row);
     });

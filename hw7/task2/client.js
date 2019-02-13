@@ -1,4 +1,9 @@
 const net = require('net');
+const fs = require('fs');
+const path = require('path');
+const { promisify } = require('util');
+
+const writeFile = promisify(fs.writeFile);
 
 const client = new net.Socket();
 client.connect(8080, () => {
@@ -15,14 +20,17 @@ client.connect(8080, () => {
 
     const meta = {
         format: 'csv',
-        //archive: true
+        archive: true
     }
 
     client.write(JSON.stringify({ filter, meta }));
 });
 
 client.on('data', data => {
-    console.log(data.toString());
+    console.log(data);
+    (async () => {
+        await writeFile(path.join(__dirname, '/receivedData/received.csv.gz'), data, 'utf8');
+      })();
 });
 
 client.on('close', () => {
