@@ -2,7 +2,6 @@
 
 const { Bank } = require('./index');
 
-jest.mock('events');
 let bank;
 
 const firstCustomer = {
@@ -12,6 +11,7 @@ const firstCustomer = {
 const firstId = 1;
 
 beforeAll(() => {
+  jest.mock('events');
   const mockMath = Object.create(global.Math);
   const mockedDate = Object.create(global.Date);
   mockMath.random = () => 0;
@@ -72,7 +72,7 @@ describe('bank', () => {
     expect(bank.customers[0].balance).toBe(10);
   });
 
-  test.only('should throw on enroll if amount is 0', () => {
-    expect(bank._enroll(firstId, 10)).toBe(`customer with id '${firstId}' not found`);
+  test('should throw on enroll if amount is 0', () => {
+    expect(() => bank.emit('add', firstId, 10)).toThrow(`customer with id '${firstId}' not found`);
   });
 });

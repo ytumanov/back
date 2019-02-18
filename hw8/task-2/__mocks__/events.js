@@ -1,11 +1,9 @@
 const events = jest.genMockFromModule('events');
 
-events.on = jest.fn((event, listener) => {
-  //todo HERE
+events.prototype.emit = jest.fn((event, data) => {
   if (event === 'error') {
-    //todo how return message correctly?
-    return listener;
+      throw data;
   }
-})
+});
 
 module.exports = events;
